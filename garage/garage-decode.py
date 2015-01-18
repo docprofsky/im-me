@@ -5,14 +5,15 @@
 # to be used with grc/usrp demodulator
 
 import struct
-	
-data = open('/tmp/garage.out').read()
+data = open('/Users/schuyler/Development/im-me/garage/test-fan.out').read()
 symbols = struct.unpack('B1'*len(data), data)
+print symbols
 
 # one bit is encoded in a triple (three adjacent symbols)
 def pwm_decode(triple):
 	# strip any extra bits added by correlator
 	stripped = (triple[0]&1, triple[1]&1, triple[2]&1)
+	print stripped
 
 	# short pulse
 	if stripped == (1,0,0):
@@ -39,9 +40,11 @@ def decode_frame(start):
 	bits = []
 	for i in range(66):
 		j = (i * 3) + start
+		print j
 		try:
 			bit = pwm_decode(symbols[j:j+3])
 		except:
+			print symbols[j:j+6]
 			return
 		bits.append(bit)
 
@@ -57,6 +60,6 @@ def decode_frame(start):
 	print "raw ook hex: %058x" % frame
 
 # look for correlations flagged by gr_correlate_access_code_bb
-for i in range(len(symbols) - 198):
+for i in range(len(symbols)):
 	if symbols[i] & 2:
 		decode_frame(i)
